@@ -1,0 +1,18 @@
+{
+    "extract":[
+      {"file_format":"iceberg","file_path":"iceberg.silver.customer2","name":"target","type":"read_file"},
+    {"file_format":"parquet","file_path":"s3a://warehouse/bronze/customer_parquet/2025-10-05","name":"source","type":"read_file"}
+    ],
+    "transform" : {"type":"scd2",
+        "step":[
+    ]
+}
+    
+    ,
+    "load": {
+        "type":"write_iceberg",
+        "path":"iceberg.silver.customer2"
+    }
+
+}
+

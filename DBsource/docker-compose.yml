@@ -1,0 +1,26 @@
+
+
+services:
+  postgres-source:
+    image: postgres:13   # dùng version 13 thay vì 16
+    container_name: postgres-source
+    environment:
+      - POSTGRES_USER=source_user
+      - POSTGRES_PASSWORD=source_pass
+      - POSTGRES_DB=sourcedb
+      - TZ=Asia/Ho_Chi_Minh
+    ports:
+      - "15432:5432"
+    volumes:
+      - postgres_source_data:/var/lib/postgresql/data
+    command: ["postgres", "-c", "wal_level=logical", "-c", "max_replication_slots=10", "-c", "max_wal_senders=10"]
+    networks:
+      - fulloption_iceberg_net
+
+
+volumes:
+  postgres_source_data:
+
+networks:
+  fulloption_iceberg_net:
+    external: true

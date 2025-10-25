@@ -1,0 +1,81 @@
+[
+    {
+        "extract_dfs": {
+            "customer_scd4a_current": {
+                "file_format": "parquet",
+                "file_path": "s3a://warehouse/bronze/customer_parquet_test",
+                "type": "read_file",
+                "date_column": "updated_timestamp",
+                "latency": -5
+            }
+        },
+        "transform_dfs": {
+            "customer_scd4a_current": [
+                {
+                    "op": "withColumn",
+                    "args": {
+                        "colName": "rn",
+                        "col": " F.row_number().over(Window.partitionBy('id').orderBy(F.col('updated_timestamp').desc()))"
+                    }
+                },
+                {
+                    "op": "filter",
+                    "args": {
+                        "condition": "F.col('rn') == 1"
+                    }
+                },
+                {
+                    "op": "filter",
+                    "args": {
+                        "condition": "F.col('action').isin('INSERT', 'UPDATE')"
+                    }
+                },
+                {
+                    "op": "drop",
+                    "args": {
+                        "cols": [
+                            "rn"
+                        ]
+                    }
+                },
+                {
+                    "op": "withColumn",
+                    "args": {
+                        "colName": "partition_date",
+                        "col": "F.lit((date.today() + timedelta(days= -5 )))"
+                    }
+                }
+            ]
+        },
+        "load": {
+            "customer_scd4a_current": {
+                "type": "scd4a_current",
+                "path": "iceberg.silver.customer",
+                "format": "iceberg",
+                "partition_by": "partition_date"
+            }
+        }
+    },
+    {
+        "extract_dfs": {
+            "customer_scd4a_hist": {
+                "file_format": "iceberg",
+                "file_path": "iceberg.silver.customer_scd4a_current",
+                "type": "read_iceberg",
+                "date_column": "partition_date",
+                "latency": -5
+            }
+        },
+        "transform_dfs": {
+
+        },
+        "load": {
+            "customer_scd4a_hist": {
+                "type": "scd4a_hist",
+                "path": "iceberg.silver.customer",
+                "format": "iceberg",
+                "partition_by": "partition_date"
+            }
+        }
+    }
+]

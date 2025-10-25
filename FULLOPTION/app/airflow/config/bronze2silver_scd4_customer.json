@@ -1,0 +1,30 @@
+{
+    "extract_dfs": {
+        "customer_scd4": {
+            "file_format": "parquet",
+            "file_path": "s3a://warehouse/bronze/customer_parquet_test",
+            "type": "read_bronze",
+            "latency": -7
+        }
+    },
+    "transform_dfs": {
+        "customer_scd4": [
+            {
+                "op": "withColumn",
+                "args": {
+                    "colName": "partition_date",
+                    "col": "F.to_date(F.col('updated_timestamp'))"
+                }
+            }
+        ]
+    },
+    "load": {
+        "customer_scd4": {
+            "type": "scd4",
+            "tbl_current":"iceberg.silver.customer_scd4_current",
+            "tbl_hist": "iceberg.silver.customer_scd4_hist",
+            "format": "iceberg",
+            "partition_by": "partition_date"
+        }
+    }
+}

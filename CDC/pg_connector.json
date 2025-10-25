@@ -1,0 +1,21 @@
+{
+  "name": "tungyeuem",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "tasks.max": "1",
+    "database.hostname": "postgres-source",
+    "database.port": "5432",
+    "database.user": "source_user",
+    "database.password": "source_pass",
+    "database.dbname": "postgres",
+    "topic.prefix": "sourcedb",
+    "plugin.name": "pgoutput",
+    "slot.name": "debezium_slot1",
+    "publication.name": "dbz_publication1",
+    "snapshot.mode": "initial",
+    "slot.drop.on.stop": "true",
+    "include.before": "true",
+    "tombstones.on.delete": "false",
+    "table.include.list": "public.customer_raw"
+  }
+}
