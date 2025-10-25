@@ -66,3 +66,6 @@ query = (
 )
 
 query.awaitTermination()
+
+
+print("tung")
