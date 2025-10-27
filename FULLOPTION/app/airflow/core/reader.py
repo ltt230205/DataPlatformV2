@@ -7,12 +7,6 @@ import json
 
 
 class Reader:
-    @staticmethod #chưa cần dùng 
-    def read_file_cdc5(spark: SparkSession, args):
-        extract_date = args.pop("extract_date")
-        date_column = args.pop("date_column")
-        return spark.read.format(args["file_format"]).load(args["file_path"]).filter(F.to_date(F.col(date_column)) == F.lit(extract_date))
-    
     @staticmethod
     def read_iceberg(spark: SparkSession, args):
         extract_date = args.pop("extract_date")
@@ -24,7 +18,11 @@ class Reader:
         return spark.read.format(args["file_format"]).load(args["file_path"]+f"/partition_date={args['extract_date']}")
 
     @staticmethod
-    def read_jdbc(spark: SparkSession, args):
+    def read_jdbc_cdc4(spark: SparkSession, args):
         extract_date = args.pop("extract_date")
         date_column = args.pop("date_column")
         return spark.read.jdbc(**args).filter(F.to_date(F.col(date_column)) == F.lit(extract_date))
+
+    @staticmethod
+    def read_jdbc(spark: SparkSession, args):
+        return spark.read.jdbc(**args)
