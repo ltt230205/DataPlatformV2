@@ -36,50 +36,50 @@ class IcebergWriter:
     @staticmethod
     def write_scd2(spark: SparkSession, df: DataFrame, args: dict):
         spark.sql("CREATE NAMESPACE IF NOT EXISTS iceberg.silver")
-        if not spark.catalog.tableExists(f"{args['path']}"):
-            df.writeTo(args["path"]).using("iceberg").partitionedBy(
+        if not spark.catalog.tableExists(f"{args['table_name']}"):
+            df.writeTo(args["table_name"]).using("iceberg").partitionedBy(
             args["partition_by"]
         ).createOrReplace()
         else:
-            df.writeTo(args["path"]).using("iceberg").partitionedBy(
+            df.writeTo(args["table_name"]).using("iceberg").partitionedBy(
             args["partition_by"]
         ).append()
             
     @staticmethod #Load bảng scd4_hist
     def write_scd4_hist(spark: SparkSession, df: DataFrame, args: dict):
         spark.sql("CREATE NAMESPACE IF NOT EXISTS iceberg.silver")
-        if not spark.catalog.tableExists(args["table"] + "_scd4_hist"):
-            df.writeTo(args["table"] + "_scd4_hist").using("iceberg").partitionedBy(
+        if not spark.catalog.tableExists(args["table_name"] + "_scd4_hist"):
+            df.writeTo(args["table_name"] + "_scd4_hist").using("iceberg").partitionedBy(
             args["partition_by"]
         ).createOrReplace()
         else:
-            df.writeTo(args["table"] + "_scd4_hist").using("iceberg").partitionedBy(
+            df.writeTo(args["table_name"] + "_scd4_hist").using("iceberg").partitionedBy(
             args["partition_by"]
         ).append()            
             
     @staticmethod #Load bảng scd4_current
     def write_scd4_current(spark: SparkSession, df: DataFrame, args: dict):
         spark.sql("CREATE NAMESPACE IF NOT EXISTS iceberg.silver")
-        df.writeTo(args['path'] + "_scd4_current").using("iceberg").partitionedBy(
+        df.writeTo(args['table_name'] + "_scd4_current").using("iceberg").partitionedBy(
             args["partition_by"]
         ).createOrReplace()
 
     @staticmethod #Load bảng scd4a_hist
     def write_scd4a_hist(spark: SparkSession, df: DataFrame, args: dict):
         spark.sql("CREATE NAMESPACE IF NOT EXISTS iceberg.silver")
-        if not spark.catalog.tableExists(f"{args['path']}_scd4a_hist"):
-            df.writeTo(args["path"] + "_scd4a_hist").using("iceberg").partitionedBy(
+        if not spark.catalog.tableExists(f"{args['table_name']}_scd4a_hist"):
+            df.writeTo(args["table_name"] + "_scd4a_hist").using("iceberg").partitionedBy(
             args["partition_by"]
         ).createOrReplace()
         else:
-            df.writeTo(args["path"] + "_scd4a_hist").using("iceberg").partitionedBy(
+            df.writeTo(args["table_name"] + "_scd4a_hist").using("iceberg").partitionedBy(
             args["partition_by"]
         ).append()
             
     @staticmethod #Load bảng scd4a_current
     def write_scd4a_current(spark: SparkSession, df: DataFrame, args: dict):
         spark.sql("CREATE NAMESPACE IF NOT EXISTS iceberg.silver")
-        df.writeTo(args['path'] + "_scd4a_current").using("iceberg").partitionedBy(
+        df.writeTo(args['table_name'] + "_scd4a_current").using("iceberg").partitionedBy(
             args["partition_by"]
         ).createOrReplace()
 
