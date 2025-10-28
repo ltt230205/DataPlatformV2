@@ -8,7 +8,7 @@ default_args = {
 }
 
 with DAG(
-    dag_id="spark_minio_demo",
+    dag_id="raw2bronze_cdc5_customer",
     start_date=datetime(2025, 1, 1),
     schedule=None,  # chỉ chạy khi trigger
     catchup=False,
@@ -17,7 +17,7 @@ with DAG(
 
     # Task chạy Spark để đọc orders.csv từ MinIO
     spark_job = SparkSubmitOperator(
-        task_id="read_orders_from_minio",
+        task_id="raw2bronze_cdc5_customer",
         application="/opt/bitnami/spark/app/airflow/job/raw2bronze_customer.py",
         py_files="/opt/bitnami/spark/app/airflow/core.zip", # script Spark bạn sẽ tạo
         conn_id="spark_default", # hoặc dùng spark-thrift-server nếu bạn cấu hình connection

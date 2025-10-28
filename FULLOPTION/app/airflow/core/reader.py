@@ -27,5 +27,5 @@ class Reader:
         return spark.read.jdbc(**args).filter(F.to_date(F.col(date_column)) == F.lit(extract_date))
 
     @staticmethod
-    def read_jdbc(spark: SparkSession, args):
+    def read_jdbc_cdc5(spark: SparkSession, args):
         return spark.read.jdbc(**args)
