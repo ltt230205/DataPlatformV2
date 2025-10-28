@@ -36,21 +36,15 @@ class ETL:
         )
         return spark
 
-    def extract_dfs(spark: SparkSession, args: dict, current_date):
+    def extract_dfs(spark: SparkSession, args: dict):
         ds_df = {}
         for table_name, source in args.items():
-            latency = source.pop("latency")
-            extract_date = current_date + timedelta(days=latency)
-            source["extract_date"] = extract_date
             function_name = source.pop("type")
             func = getattr(Reader, function_name)
             ds_df[table_name] = func(spark, source)
         return ds_df
 
-    def extract(spark: SparkSession, args: dict, current_date):
-        latency = args.pop("latency")
-        extract_date = current_date + timedelta(days=latency)
-        args["extract_date"] = extract_date
+    def extract(spark: SparkSession, args: dict):
         function_name = args.pop("type")
         func = getattr(Reader, function_name)
         df = func(spark, args)
@@ -98,8 +92,7 @@ class ETL:
             print("done load table: ", table_name)
 
     def run(spark: SparkSession, json_conf):
-            current_date = date.today() 
-            df_raw = ETL.extract_dfs(spark, json_conf["extract_dfs"], current_date)
+            df_raw = ETL.extract_dfs(spark, json_conf["extract_dfs"])
             df_trans = ETL.tranform_dfs(spark, df_raw, json_conf["transform_dfs"])
             ETL.load(spark, df_trans, json_conf["load"])
 

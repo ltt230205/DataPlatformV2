@@ -19,6 +19,9 @@ class Reader:
 
     @staticmethod
     def read_jdbc_cdc4(spark: SparkSession, args):
+        latency = args.pop("latency")
+        extract_date = date.today() + timedelta(days=latency)
+        args["extract_date"] = extract_date
         extract_date = args.pop("extract_date")
         date_column = args.pop("date_column")
         return spark.read.jdbc(**args).filter(F.to_date(F.col(date_column)) == F.lit(extract_date))
