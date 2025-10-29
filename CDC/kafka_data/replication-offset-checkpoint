@@ -26,7 +26,7 @@ connect_offsets 10 0
 connect_offsets 0 0
 __consumer_offsets 20 0
 __consumer_offsets 18 0
-connect_statuses 4 10
+connect_statuses 4 11
 connect_offsets 21 0
 __consumer_offsets 48 0
 connect_offsets 24 0
