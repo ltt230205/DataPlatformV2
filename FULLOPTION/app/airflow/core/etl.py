@@ -58,10 +58,10 @@ class ETL:
                 for k, v in args.items():
                     if isinstance(v, str) and v.startswith("F."):
                         args[k] = eval(v)
-                if func_name == "sql" in args:
+                if func_name == "sql" and "query" in args and "view_name" in args:
                     dfs[table_name].createOrReplaceTempView(args["view_name"])
                     dfs[table_name] = spark.sql(args["query"])
-                if func_name == "drop" and "cols" in args:
+                elif func_name == "drop" and "cols" in args:
                     dfs[table_name] = dfs[table_name].drop(*args["cols"])
                 else:
                     dfs[table_name] = getattr(dfs[table_name], func_name)(**args)

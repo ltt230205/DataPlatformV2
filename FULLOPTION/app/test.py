@@ -19,17 +19,17 @@ spark = (
 # yesterday = date.today() - timedelta(days=1)
 # df_check = spark.read.parquet(f"s3a://warehouse/bronze/customer_parquet_test")
 # df_check.show(100)
-df=spark.read.format("parquet").load("s3a://warehouse/bronze/customer_parquet_cdc5")
-df.select("user_id","action").show(50)
+# df=spark.read.format("parquet").load("s3a://warehouse/bronze/customer_parquet_cdc5")
+# df.select("user_id","action").show(50)
 
 
-spark.sql("select user_id, action ,partition_date from iceberg.silver.customer_scd4a_current").show(20)
-spark.sql("select user_id, action, partition_date from iceberg.silver.customer_scd4a_hist").show(20)
+spark.sql("select user_id, action ,partition_date from iceberg.silver.customer_scd4_current").show(20)
+spark.sql("select user_id, action, partition_date from iceberg.silver.customer_scd4_hist").show(20)
 # his_silverdf = df_check.select("id","name","email","action",F.col("update_timestamp").alias("valid_from"),F.lit("9999-12-31").alias("valid_to")).withColumn("partition_date",F.lit("2025-10-01"))
 # his_silverdf.show()
 # his_silverdf.writeTo("iceberg.silver.customer2").using("iceberg").partitionedBy("partition_date").createOrReplace()
-# spark.sql("DROP TABLE IF EXISTS iceberg.silver.customer_scd4a_current")
-# spark.sql("DROP TABLE IF EXISTS iceberg.silver.customer_scd4a_hist")
+# spark.sql("DROP TABLE IF EXISTS iceberg.silver.customer_scd4_current")
+# spark.sql("DROP TABLE IF EXISTS iceberg.silver.customer_scd4_hist")
 
 # current_silverdf1=df_check.select("id","name","email","action",F.col("update_timestamp").alias("valid_from"),F.lit("9999-12-31").alias("valid_to"))
 # current_silverdf1.writeTo("iceberg.silver.curr_cus_scd4").using("iceberg").createOrReplace()

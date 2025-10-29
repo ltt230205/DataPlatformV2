@@ -18,7 +18,7 @@ with DAG(
     # Task chạy Spark để đọc orders.csv từ MinIO
     spark_job = SparkSubmitOperator(
         task_id="raw2bronze_cdc5_customer",
-        application="/opt/bitnami/spark/app/airflow/job/raw2bronze_customer.py",
+        application="/opt/bitnami/spark/app/airflow/job/raw2bronze_cdc5_customer.py",
         py_files="/opt/bitnami/spark/app/airflow/core.zip", # script Spark bạn sẽ tạo
         conn_id="spark_default", # hoặc dùng spark-thrift-server nếu bạn cấu hình connection
         packages="org.postgresql:postgresql:42.7.3", 

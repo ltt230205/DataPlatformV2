@@ -1,14 +1,14 @@
 {
     "extract_dfs": {
-        "customer_scd4": {
+        "customer_scd4_hist": {
             "file_format": "parquet",
-            "file_path": "s3a://warehouse/bronze/customer_parquet_test",
+            "file_path": "s3a://warehouse/bronze/customer_parquet_cdc4",
             "type": "read_bronze",
-            "latency": -7
+            "latency": -4
         }
     },
     "transform_dfs": {
-        "customer_scd4": [
+        "customer_scd4_hist": [
             {
                 "op": "withColumn",
                 "args": {
@@ -19,10 +19,9 @@
         ]
     },
     "load": {
-        "customer_scd4": {
-            "type": "scd4",
-            "tbl_current":"iceberg.silver.customer_scd4_current",
-            "tbl_hist": "iceberg.silver.customer_scd4_hist",
+        "customer_scd4_hist": {
+            "type": "scd4_hist",
+            "table_name": "iceberg.silver.customer",
             "format": "iceberg",
             "partition_by": "partition_date"
         }
