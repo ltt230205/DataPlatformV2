@@ -23,8 +23,8 @@ spark = (
 # df.select("user_id","action").show(50)
 
 
-spark.sql("select user_id, action ,partition_date from iceberg.silver.customer_scd4_current").show(20)
-spark.sql("select user_id, action, partition_date from iceberg.silver.customer_scd4_hist").show(20)
+spark.sql("select user_id, action ,partition_date from iceberg.silver.customer_scd2").show(20)
+# spark.sql("select user_id, action, partition_date from iceberg.silver.customer_scd4_hist").show(20)
 # his_silverdf = df_check.select("id","name","email","action",F.col("update_timestamp").alias("valid_from"),F.lit("9999-12-31").alias("valid_to")).withColumn("partition_date",F.lit("2025-10-01"))
 # his_silverdf.show()
 # his_silverdf.writeTo("iceberg.silver.customer2").using("iceberg").partitionedBy("partition_date").createOrReplace()

@@ -19,7 +19,7 @@ with DAG(
 # 1 Job tạo bảng hist
     job_hist = SparkSubmitOperator(
         task_id="bronze_to_silver_customer_scd4_hist",
-        application="/opt/bitnami/spark/app/airflow/job/bronze2sil_scd4_hist_cus.py",
+        application="/opt/bitnami/spark/app/airflow/job/bronze2sil_scd4_hist_customer.py",
         py_files="/opt/bitnami/spark/app/airflow/core.zip",
         conn_id="spark_default",
         packages="org.postgresql:postgresql:42.7.3",
@@ -38,7 +38,7 @@ with DAG(
     # 2 Job tạo bảng current
     job_current = SparkSubmitOperator(
         task_id="bronze_to_silver_customer_scd4_current",
-        application="/opt/bitnami/spark/app/airflow/job/bronze2sil_scd4_current_cus.py",
+        application="/opt/bitnami/spark/app/airflow/job/bronze2sil_scd4_current_customer.py",
         py_files="/opt/bitnami/spark/app/airflow/core.zip",
         conn_id="spark_default",
         packages="org.postgresql:postgresql:42.7.3",

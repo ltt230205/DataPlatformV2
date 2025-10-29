@@ -6,42 +6,42 @@ import json
 
 
 class IcebergWriter:
-    @staticmethod
-    def write_scd2_streaming(spark: SparkSession, df: DataFrame, actions: list):
-        silver_current = df["target"].filter(F.col("valid_to") == "9999-12-31")
-        thutucot = silver_current.columns
-        update_df = (
-            df["source"]
-            .alias("src")
-            .join(silver_current.drop("valid_to").alias("tar"), on="id")
-            .filter(F.col("src.action").isin("update", "delete"))
-            .select("tar.*", F.col("src.update_timestamp").alias("valid_to"))
-        )
-        update_df = update_df.select(thutucot)
-        insert_df = (
-            df["source"]
-            .filter(F.col("action").isin("insert", "update"))
-            .withColumn("valid_from", F.col("update_timestamp"))
-            .withColumn("valid_to", F.lit("9999-12-31"))
-            .withColumn("partition_date", F.current_date())
-            .drop("update_timestamp")
-        )
-        insert_df = insert_df.select(thutucot)
-        unchanged_df = silver_current.alias("tar").join(
-            df["source"].alias("src"), on="id", how="left_anti"
-        )
-        final_df = unchanged_df.unionByName(update_df).unionByName(insert_df)
-        return final_df
+    # @staticmethod
+    # def write_scd2_streaming(spark: SparkSession, df: DataFrame, actions: list):
+    #     silver_current = df["target"].filter(F.col("valid_to") == "9999-12-31")
+    #     thutucot = silver_current.columns
+    #     update_df = (
+    #         df["source"]
+    #         .alias("src")
+    #         .join(silver_current.drop("valid_to").alias("tar"), on="id")
+    #         .filter(F.col("src.action").isin("update", "delete"))
+    #         .select("tar.*", F.col("src.update_timestamp").alias("valid_to"))
+    #     )
+    #     update_df = update_df.select(thutucot)
+    #     insert_df = (
+    #         df["source"]
+    #         .filter(F.col("action").isin("insert", "update"))
+    #         .withColumn("valid_from", F.col("update_timestamp"))
+    #         .withColumn("valid_to", F.lit("9999-12-31"))
+    #         .withColumn("partition_date", F.current_date())
+    #         .drop("update_timestamp")
+    #     )
+    #     insert_df = insert_df.select(thutucot)
+    #     unchanged_df = silver_current.alias("tar").join(
+    #         df["source"].alias("src"), on="id", how="left_anti"
+    #     )
+    #     final_df = unchanged_df.unionByName(update_df).unionByName(insert_df)
+    #     return final_df
     
     @staticmethod
     def write_scd2(spark: SparkSession, df: DataFrame, args: dict):
         spark.sql("CREATE NAMESPACE IF NOT EXISTS iceberg.silver")
-        if not spark.catalog.tableExists(f"{args['table_name']}"):
-            df.writeTo(args["table_name"]).using("iceberg").partitionedBy(
+        if not spark.catalog.tableExists(args["table_name"] + "_scd2"):
+            df.writeTo(args["table_name"] + "_scd2").using("iceberg").partitionedBy(
             args["partition_by"]
         ).createOrReplace()
         else:
-            df.writeTo(args["table_name"]).using("iceberg").partitionedBy(
+            df.writeTo(args["table_name"] + "_scd2").using("iceberg").partitionedBy(
             args["partition_by"]
         ).append()
             
