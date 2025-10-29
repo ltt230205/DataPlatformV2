@@ -10,8 +10,7 @@
                     "driver": "org.postgresql.Driver"
                 },
                 "date_column": "updated_timestamp",
-                "type": "read_jdbc_cdc4",
-                "latency": -3
+                "type": "read_jdbc_cdc5"
             }
         },
         "transform_dfs": {

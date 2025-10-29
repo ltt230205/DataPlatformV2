@@ -46,32 +46,17 @@ class IcebergWriter:
         ).append()
             
     @staticmethod #Load bảng scd4_hist
-    def write_scd4(spark: SparkSession, df: DataFrame, args: dict):
+    def write_scd4_hist(spark: SparkSession, df: DataFrame, args: dict):
         spark.sql("CREATE NAMESPACE IF NOT EXISTS iceberg.silver")
-        if not spark.catalog.tableExists(args["tbl_hist"]):
-            df.writeTo(args["tbl_hist"]).using("iceberg").partitionedBy(
+        if not spark.catalog.tableExists(args["table_name"] + "_scd4_hist"): # thêm dữ liệu vào lần đầu
+            df.writeTo(args["table_name"] + "_scd4_hist").using("iceberg").partitionedBy(
             args["partition_by"]
         ).createOrReplace()
         else:
-            df.writeTo(args["tbl_hist"]).using("iceberg").partitionedBy(
+            df.writeTo(args["table_name"] + "_scd4_hist").using("iceberg").partitionedBy(
             args["partition_by"]
-        ).append()
-            
-        df_query=spark.sql(f"""
-        SELECT *
-        FROM (
-            SELECT *,
-                ROW_NUMBER() OVER (PARTITION BY id ORDER BY updated_timestamp DESC) AS rn
-            FROM {args["tbl_hist"]}
-
-        ) t
-        WHERE rn = 1 and (action != 'DELETE');
-        """
-        )
-        df_query= df_query.drop("rn")
-        df_query.writeTo(args["tbl_current"]).using("iceberg").partitionedBy(
-            args["partition_by"]
-        ).createOrReplace()
+        ).append()            # nối tiếp dữ liệu mới với dữ liệu cũ trước đó
+        
             
             
     @staticmethod #Load bảng scd4_current
