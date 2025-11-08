@@ -1,0 +1,38 @@
+{
+    "extract_dfs": {
+        "customer": {
+            "table": "public.customer",
+            "url": "jdbc:postgresql://postgres-source:5432/postgres",
+            "properties": {
+                "user": "source_user",
+                "password": "source_pass",
+                "driver": "org.postgresql.Driver"
+            },
+            "type": "read_jdbc_cdc4",
+            "date_column": "updated_timestamp",
+            "latency": -4
+        }
+    },
+    "transform_dfs": {
+        "customer": [
+            {
+                "op": "withColumn",
+                "args": {
+                    "colName": "partition_date",
+                    "col": "F.to_date(F.col('updated_timestamp'))"
+                }
+            }
+        ]
+    },
+    "load": {
+        "customer": {
+            "type": "file",
+            "mode": "append",
+            "format": "parquet",
+            "partition_by": [
+                "partition_date"
+            ],
+            "path": "s3a://warehouse/bronze/customer_parquet_cdc4"
+        }
+    }
+}
