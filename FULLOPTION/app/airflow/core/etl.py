@@ -7,6 +7,7 @@ from core import parquet_writer
 from core import reader, iceberg_writer
 from core import util
 from pyspark.sql import Window
+from transform_base import TransformBase
 
 
 Reader = reader.Reader
@@ -14,6 +15,7 @@ Reader = reader.Reader
 Parquet = parquet_writer.ParquetWriter
 
 Iceberg = iceberg_writer.IcebergWriter
+
 
 
 class ETL:
@@ -50,7 +52,9 @@ class ETL:
         df = func(spark, args)
         return df
 
-    def tranform_dfs(spark: SparkSession, dfs: dict, transform_conf: dict):
+    def tranform_dfs(spark: SparkSession, dfs: dict, transform_conf: any):
+        if isinstance(transform_conf, str):
+            TransformBase.excute(dfs, transform_conf)
         for table_name, source in transform_conf.items():
             for step in source:
                 func_name = step["op"]
