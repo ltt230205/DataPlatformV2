@@ -1,12 +1,11 @@
 class TransformBase:
-    def __init__(self):
-        self.dfs= {}
-        pass
-    
+    def __init__(self, dfs:dict):
+        self.dfs = dfs
+
     @staticmethod
-    def excute():
-        pass
+    def excute(transformation, dfs):
+        transform = transformation(dfs)
+        return transform.transform()
 
-    def transformation(self):
-
+    def transform(self):
         raise NotImplementedError()

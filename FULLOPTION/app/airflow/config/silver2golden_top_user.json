@@ -21,9 +21,8 @@
             "date_column": "partition_date",
             "latency": -4
         }
-    },
-    "transform_dfs": "Silver2GoldenTopUser"
-    ,
+    },                                                  
+    "transform_dfs": "job.silver2golden_top_user.Silver2GoldenTopUser",
     "load": {
         "customer_scd4_current": {
             "type": "scd4_current",

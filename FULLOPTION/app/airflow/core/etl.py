@@ -8,6 +8,7 @@ from core import reader, iceberg_writer
 from core import util
 from pyspark.sql import Window
 from transform_base import TransformBase
+import importlib
 
 
 Reader = reader.Reader
@@ -53,22 +54,28 @@ class ETL:
         return df
 
     def tranform_dfs(spark: SparkSession, dfs: dict, transform_conf: any):
+        dfs = None
         if isinstance(transform_conf, str):
-            TransformBase.excute(dfs, transform_conf)
-        for table_name, source in transform_conf.items():
-            for step in source:
-                func_name = step["op"]
-                args = step.get("args", {})
-                for k, v in args.items():
-                    if isinstance(v, str) and v.startswith("F."):
-                        args[k] = eval(v)
-                if func_name == "sql" and "query" in args and "view_name" in args:
-                    dfs[table_name].createOrReplaceTempView(args["view_name"])
-                    dfs[table_name] = spark.sql(args["query"])
-                elif func_name == "drop" and "cols" in args:
-                    dfs[table_name] = dfs[table_name].drop(*args["cols"])
-                else:
-                    dfs[table_name] = getattr(dfs[table_name], func_name)(**args)
+            module = importlib.import_module(".".join(transform_conf.split(".")[:-1]))
+            transformation = getattr(module, transform_conf.split(".")[-1])
+            dfs = TransformBase.excute(transformation, dfs)
+        if isinstance(transform_conf, dict):
+            for table_name, source in transform_conf.items():
+                for step in source:
+                    func_name = step["op"]
+                    args = step.get("args", {})
+                    for k, v in args.items():
+                        if isinstance(v, str) and v.startswith("F."):
+                            args[k] = eval(v)
+                    if func_name == "sql" and "query" in args and "view_name" in args:
+                        dfs[table_name].createOrReplaceTempView(args["view_name"])
+                        dfs[table_name] = spark.sql(args["query"])
+                    elif func_name == "drop" and "cols" in args:
+                        dfs[table_name] = dfs[table_name].drop(*args["cols"])
+                    else:
+                        dfs[table_name] = getattr(dfs[table_name], func_name)(**args)
+            if dfs is None:
+                raise Exception("transformation do not return any dataframe")
         return dfs
     
     def tranform(spark: SparkSession, df: DataFrame, transform_conf: list):
