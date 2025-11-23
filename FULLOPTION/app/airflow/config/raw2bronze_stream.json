@@ -1,0 +1,14 @@
+{
+  "extract": {
+    "topic": "sourcedb.public.customer1",
+    "kafka_bootstrap": "kafka:9092",
+    "mode" : "earliest"
+  },
+
+  "load": {
+    "topic": "customer1",
+    "format": "parquet",
+    "path": "s3a://warehouse/bronze/customer_parquet",
+    "partition_by": "partition_date"
+  }
+}

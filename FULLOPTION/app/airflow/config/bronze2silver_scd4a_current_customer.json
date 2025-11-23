@@ -1,0 +1,36 @@
+{
+    "extract_dfs": {
+        "customer_scd4a_current": {
+            "file_format": "parquet",
+            "file_path": "s3a://warehouse/bronze/customer_parquet_cdc5",
+            "type": "read_bronze",
+            "date_column": "updated_timestamp",
+            "latency": 0
+        }
+    },
+    "transform_dfs": {
+        "customer_scd4a_current": [
+            {
+                "op": "filter",
+                "args": {
+                    "condition": "F.col('action').isin('INSERT', 'UPDATE')"
+                }
+            },
+            {
+                "op": "withColumn",
+                "args": {
+                    "colName": "partition_date",
+                    "col": "F.lit((date.today() + timedelta(days=0)))"
+                }
+            }
+        ]
+    },
+    "load": {
+        "customer_scd4a_current": {
+            "type": "scd4a_current",
+            "table_name": "iceberg.silver.customer",
+            "format": "iceberg",
+            "partition_by": "partition_date"
+        }
+    }
+}
