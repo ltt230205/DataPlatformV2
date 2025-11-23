@@ -22,7 +22,7 @@
             "latency": -4
         }
     },                                                  
-    "transform_dfs": "job.silver2golden_top_user.Silver2GoldenTopUser",
+    "transform_dfs": "transformation.silver2golden_top_user.Silver2GoldenTopUser",
     "load": {
         "customer_scd4_current": {
             "type": "scd4_current",

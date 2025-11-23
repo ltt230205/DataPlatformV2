@@ -1,22 +1,17 @@
+from core import parquet_writer
+from core import reader, iceberg_writer
+from core.reader import Reader
+from core.parquet_writer import ParquetWriter
+from core.iceberg_writer import IcebergWriter
+from core.transform_base import TransformBase
+from core import util
+from pyspark.sql import Window
+from datetime import date, timedelta
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 from pyspark.sql import DataFrame
-from datetime import date, timedelta
-import json
-from core import parquet_writer
-from core import reader, iceberg_writer
-from core import util
-from pyspark.sql import Window
-from transform_base import TransformBase
 import importlib
-
-
-Reader = reader.Reader
-
-Parquet = parquet_writer.ParquetWriter
-
-Iceberg = iceberg_writer.IcebergWriter
-
+import json
 
 
 class ETL:
