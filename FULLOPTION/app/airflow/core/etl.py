@@ -1,21 +1,17 @@
+from core import parquet_writer
+from core import reader, iceberg_writer
+from core.reader import Reader
+from core.parquet_writer import ParquetWriter
+from core.iceberg_writer import IcebergWriter
+from core.transform_base import TransformBase
+from core import util
+from pyspark.sql import Window
+from datetime import date, timedelta
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 from pyspark.sql import DataFrame
-from datetime import date, timedelta
+import importlib
 import json
-from core import parquet_writer
-from core import reader, iceberg_writer
-from core import util
-from pyspark.sql import Window
-from transform_base import TransformBase
-
-
-Reader = reader.Reader
-
-Parquet = parquet_writer.ParquetWriter
-
-Iceberg = iceberg_writer.IcebergWriter
-
 
 
 class ETL:
@@ -53,22 +49,28 @@ class ETL:
         return df
 
     def tranform_dfs(spark: SparkSession, dfs: dict, transform_conf: any):
+        dfs = None
         if isinstance(transform_conf, str):
-            TransformBase.excute(dfs, transform_conf)
-        for table_name, source in transform_conf.items():
-            for step in source:
-                func_name = step["op"]
-                args = step.get("args", {})
-                for k, v in args.items():
-                    if isinstance(v, str) and v.startswith("F."):
-                        args[k] = eval(v)
-                if func_name == "sql" and "query" in args and "view_name" in args:
-                    dfs[table_name].createOrReplaceTempView(args["view_name"])
-                    dfs[table_name] = spark.sql(args["query"])
-                elif func_name == "drop" and "cols" in args:
-                    dfs[table_name] = dfs[table_name].drop(*args["cols"])
-                else:
-                    dfs[table_name] = getattr(dfs[table_name], func_name)(**args)
+            module = importlib.import_module(".".join(transform_conf.split(".")[:-1]))
+            transformation = getattr(module, transform_conf.split(".")[-1])
+            dfs = TransformBase.excute(transformation, dfs)
+        if isinstance(transform_conf, dict):
+            for table_name, source in transform_conf.items():
+                for step in source:
+                    func_name = step["op"]
+                    args = step.get("args", {})
+                    for k, v in args.items():
+                        if isinstance(v, str) and v.startswith("F."):
+                            args[k] = eval(v)
+                    if func_name == "sql" and "query" in args and "view_name" in args:
+                        dfs[table_name].createOrReplaceTempView(args["view_name"])
+                        dfs[table_name] = spark.sql(args["query"])
+                    elif func_name == "drop" and "cols" in args:
+                        dfs[table_name] = dfs[table_name].drop(*args["cols"])
+                    else:
+                        dfs[table_name] = getattr(dfs[table_name], func_name)(**args)
+            if dfs is None:
+                raise Exception("transformation do not return any dataframe")
         return dfs
     
     def tranform(spark: SparkSession, df: DataFrame, transform_conf: list):
