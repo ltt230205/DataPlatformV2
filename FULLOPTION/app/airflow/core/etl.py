@@ -1,19 +1,17 @@
+from core import parquet_writer
+from core import reader, iceberg_writer
+from core.reader import Reader
+from core.parquet_writer import ParquetWriter
+from core.iceberg_writer import IcebergWriter
+from core.transform_base import TransformBase
+from core import util
+from pyspark.sql import Window
+from datetime import date, timedelta
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 from pyspark.sql import DataFrame
-from datetime import date, timedelta
+import importlib
 import json
-from core import parquet_writer
-from core import reader, iceberg_writer
-from core import util
-from pyspark.sql import Window
-
-
-Reader = reader.Reader
-
-Parquet = parquet_writer.ParquetWriter
-
-Iceberg = iceberg_writer.IcebergWriter
 
 
 class ETL:
@@ -36,41 +34,43 @@ class ETL:
         )
         return spark
 
-    def extract_dfs(spark: SparkSession, args: dict, current_date):
+    def extract_dfs(spark: SparkSession, args: dict):
         ds_df = {}
         for table_name, source in args.items():
-            latency = source.pop("latency")
-            extract_date = current_date + timedelta(days=latency)
-            source["extract_date"] = extract_date
             function_name = source.pop("type")
             func = getattr(Reader, function_name)
             ds_df[table_name] = func(spark, source)
         return ds_df
 
-    def extract(spark: SparkSession, args: dict, current_date):
-        latency = args.pop("latency")
-        extract_date = current_date + timedelta(days=latency)
-        args["extract_date"] = extract_date
+    def extract(spark: SparkSession, args: dict):
         function_name = args.pop("type")
         func = getattr(Reader, function_name)
         df = func(spark, args)
         return df
 
-    def tranform_dfs(spark: SparkSession, dfs: dict, transform_conf: dict):
-        for table_name, source in transform_conf.items():
-            for step in source:
-                func_name = step["op"]
-                args = step.get("args", {})
-                for k, v in args.items():
-                    if isinstance(v, str) and v.startswith("F."):
-                        args[k] = eval(v)
-                if func_name == "sql" in args:
-                    dfs[table_name].createOrReplaceTempView(args["view_name"])
-                    dfs[table_name] = spark.sql(args["query"])
-                if func_name == "drop" and "cols" in args:
-                    dfs[table_name] = dfs[table_name].drop(*args["cols"])
-                else:
-                    dfs[table_name] = getattr(dfs[table_name], func_name)(**args)
+    def tranform_dfs(spark: SparkSession, dfs: dict, transform_conf: any):
+        dfs = None
+        if isinstance(transform_conf, str):
+            module = importlib.import_module(".".join(transform_conf.split(".")[:-1]))
+            transformation = getattr(module, transform_conf.split(".")[-1])
+            dfs = TransformBase.excute(transformation, dfs)
+        if isinstance(transform_conf, dict):
+            for table_name, source in transform_conf.items():
+                for step in source:
+                    func_name = step["op"]
+                    args = step.get("args", {})
+                    for k, v in args.items():
+                        if isinstance(v, str) and v.startswith("F."):
+                            args[k] = eval(v)
+                    if func_name == "sql" and "query" in args and "view_name" in args:
+                        dfs[table_name].createOrReplaceTempView(args["view_name"])
+                        dfs[table_name] = spark.sql(args["query"])
+                    elif func_name == "drop" and "cols" in args:
+                        dfs[table_name] = dfs[table_name].drop(*args["cols"])
+                    else:
+                        dfs[table_name] = getattr(dfs[table_name], func_name)(**args)
+            if dfs is None:
+                raise Exception("transformation do not return any dataframe")
         return dfs
     
     def tranform(spark: SparkSession, df: DataFrame, transform_conf: list):
@@ -98,8 +98,7 @@ class ETL:
             print("done load table: ", table_name)
 
     def run(spark: SparkSession, json_conf):
-            current_date = date.today() 
-            df_raw = ETL.extract_dfs(spark, json_conf["extract_dfs"], current_date)
+            df_raw = ETL.extract_dfs(spark, json_conf["extract_dfs"])
             df_trans = ETL.tranform_dfs(spark, df_raw, json_conf["transform_dfs"])
             ETL.load(spark, df_trans, json_conf["load"])
 

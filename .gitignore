@@ -16,3 +16,4 @@ CDC/logs/
 DBsource/jars/
 DBsource/jar/
 DBsource/logs/
+CDC/kafka_data
