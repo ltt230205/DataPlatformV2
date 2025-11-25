@@ -91,7 +91,7 @@ services:
       - iceberg_net
 
   spark-master:
-    image: bitnami/spark:3.5.0
+    image: custom/spark:3.5.0
     container_name: spark-master
     environment:
       - SPARK_MODE=master
@@ -118,7 +118,7 @@ services:
       - iceberg_net
 
   spark-worker-1:
-    image: bitnami/spark:3.5.0
+    image: custom/spark:3.5.0
     container_name: spark-worker-1
     environment:
       - SPARK_MODE=worker
@@ -145,7 +145,7 @@ services:
     networks:
       - iceberg_net
   spark-worker-2:
-    image: bitnami/spark:3.5.0
+    image: custom/spark:3.5.0
     container_name: spark-worker-2
     environment:
       - SPARK_MODE=worker
@@ -173,7 +173,7 @@ services:
       - iceberg_net
 
   spark-thrift-server:
-    image: bitnami/spark:3.5.0
+    image: custom/spark:3.5.0
     container_name: spark-thrift-server
     environment:
       - SPARK_CONF_DIR=/opt/bitnami/spark/conf
