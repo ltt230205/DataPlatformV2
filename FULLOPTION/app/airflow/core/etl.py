@@ -49,7 +49,6 @@ class ETL:
         return df
 
     def tranform_dfs(spark: SparkSession, dfs: dict, transform_conf: any):
-        dfs = None
         if isinstance(transform_conf, str):
             module = importlib.import_module(".".join(transform_conf.split(".")[:-1]))
             transformation = getattr(module, transform_conf.split(".")[-1])
@@ -90,9 +89,9 @@ class ETL:
             format_type = table_config.get("format")
             executor = None
             if format_type == "parquet":
-                executor = Parquet
+                executor = ParquetWriter
             elif format_type == "iceberg":
-                executor = Iceberg
+                executor = IcebergWriter
             func = getattr(executor, function_name)
             func(spark, dfs[table_name], table_config)
             print("done load table: ", table_name)
