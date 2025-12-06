@@ -1,0 +1,30 @@
+{
+    "dag_id": "raw2sil_customer_scd2",
+    "start_date": "2025, 1, 1",
+    "schedule_interval": "None",
+    "catchup": "true",
+    "default_args": {
+        "owner": "airflow",
+        "retries": 0
+    },
+    "submit_job": {
+        "bronze_to_silver": {
+            "task_id": "raw2sil_customer_scd2",
+            "application": "/opt/bitnami/spark/app/airflow/job/raw2bronze_cdc4_customer.py",
+            "py_files": "/opt/bitnami/spark/app/airflow/core.zip",
+            "conn_id": "spark_default",
+            "packages": "org.postgresql:postgresql:42.7.3",
+            "jars": "/opt/airflow/jars/hadoop-aws-3.3.4.jar, /opt/airflow/jars/aws-java-sdk-bundle-1.12.367.jar, /opt/airflow/jars/iceberg-spark-runtime-3.5_2.12-1.5.2.jar",
+            "conf": {
+                "spark.hadoop.fs.s3a.endpoint": "http://minio:9000",
+                "spark.hadoop.fs.s3a.access.key": "minio",
+                "spark.hadoop.fs.s3a.secret.key": "minio123",
+                "spark.hadoop.fs.s3a.path.style.access": "true"
+            },
+            "verbose": "true"
+        }
+    },
+    "schedule": [
+        "bronze_to_silver"
+    ]
+}
