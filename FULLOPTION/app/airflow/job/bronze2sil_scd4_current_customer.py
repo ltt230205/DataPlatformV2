@@ -1,3 +1,5 @@
 from core import etl
 
 etl.run("/opt/bitnami/spark/app/airflow/config/bronze2silver_scd4_current_customer.json")
+
+print("ETL job finished.")
