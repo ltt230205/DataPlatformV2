@@ -1,0 +1,50 @@
+pipeline {
+    agent any
+
+    stages {
+
+        stage("Checkout Code") {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage("CI - Check Spark App") {
+            steps {
+                sh "python -m py_compile app/airflow/job/**/*.py"
+            }
+        }
+
+        stage("CI - Check Airflow DAG") {
+            steps {
+                sh "python -m py_compile app/airflow/dag/**/*.py"
+            }
+        }
+
+        stage("CD - Deploy Platform") {
+            steps {
+                sh """
+                docker compose up -d
+                """
+            }
+        }
+
+        stage("Health Check - Airflow") {
+            steps {
+                sh """
+                sleep 20
+                curl -f http://localhost:8900 || exit 1
+                """
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ CI/CD SUCCESS"
+        }
+        failure {
+            echo "❌ CI/CD FAILED"
+        }
+    }
+}
